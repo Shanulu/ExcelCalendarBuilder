@@ -1,0 +1,438 @@
+    Dim promptPayday As Date
+    Dim promptFirstday As Date
+    Dim promptBiWeekly As Integer
+    Dim firstPaydayoftheYear As Date
+    Dim firstPerioddayoftheYear As Date
+    Dim A As Date
+    Dim B As Date
+    Dim C As Date
+'----------------------------------------------------------------------------
+'-- project:         Calendar Builder for Dixontax
+'-- file:            ThisWorkbook
+'-- author:          Michael Groll
+'-- version:         1.0
+'--
+'-- description:     Just using some programming to find payroll dates from
+'--                  any given payroll date. Make it function with weekly or
+'--                  biweekly payroll and also format it as Margie has done
+'--                  in the past.
+'----------------------------------------------------------------------------
+
+Public Sub FindFirstWeek()
+    'take our prompted payday and count backwards by 7 days to find the first payday of the year'
+    'go one more week in case payday falls on 12/31'
+    For Counting = 1 To 53
+
+        If promptBiWeekly = 6 Then
+            If Year(promptPayday - (Counting * 14)) < Year(promptPayday) Then
+                firstPerioddayoftheYear = promptFirstday - ((Counting - 1) * 14)
+                firstPaydayoftheYear = promptPayday - ((Counting - 1) * 14)
+                Exit For
+            End If
+        End If
+        
+        If promptBiWeekly = 7 Then
+            If Year(promptPayday - (Counting * 7)) < Year(promptPayday) Then
+                firstPerioddayoftheYear = promptFirstday - ((Counting - 1) * 7)
+                firstPaydayoftheYear = promptPayday - ((Counting - 1) * 7)
+                Exit For
+            End If
+        End If
+    Next Counting
+    'this section gives us ABC for our FillDates
+    A = firstPerioddayoftheYear
+        If promptBiWeekly = 6 Then '6 = yes to biweekly question'
+            B = firstPerioddayoftheYear + 13
+            Else: B = firstPerioddayoftheYear + 6
+        End If
+    C = firstPaydayoftheYear
+End Sub
+
+Public Sub BuildHeader()
+        
+        For qtr = 1 To 4
+        
+            If qtr = 1 Then
+                Worksheets("1st Quarter").Activate
+            End If
+            
+            If qtr = 2 Then
+                Worksheets("2nd Quarter").Activate
+            End If
+            
+            If qtr = 3 Then
+                Worksheets("3rd Quarter").Activate
+            End If
+            
+            If qtr = 4 Then
+                Worksheets("4th Quarter").Activate
+            End If
+            
+            'make header repeated on printout'
+            ActiveSheet.PageSetup.PrintTitleRows = ActiveSheet.Rows("1:5").Address
+            'fix our margins
+            ActiveSheet.PageSetup.TopMargin = Application.InchesToPoints(0.5)
+            ActiveSheet.PageSetup.BottomMargin = Application.InchesToPoints(0.5)
+            
+            
+            'Header'
+            With ActiveSheet
+                .Range("A1:K1").Merge
+                .Range("A2:B5").Merge
+                .Range("C2:C5").Merge
+                .Range("D2:D5").Merge
+                .Range("E2:E5").Merge
+                .Range("E2:E5").Merge
+                .Range("F2:F5").Merge
+                .Range("G2:I2").Merge
+                .Range("G3:G5").Merge
+                .Range("H3:H4").Merge
+                .Range("I3:I4").Merge
+                .Range("H5:I5").Merge
+                .Range("J2:J5").Merge
+                .Range("K2:K5").Merge
+                
+                
+                'Formatting'
+                
+                .Range("A1:K5").Font.Size = 12
+                .Range("A6:C30").Font.Size = 14
+                .Rows.WrapText = True
+                .Range("A1:K30").HorizontalAlignment = xlCenter
+                .Range("A1:K30").VerticalAlignment = xlCenter
+                .Rows(1).RowHeight = 22.5
+                .Columns("D").ColumnWidth = 14
+                .Columns("E").ColumnWidth = 7
+                .Columns("F").ColumnWidth = 7
+                .Columns("A:C").ColumnWidth = 13.75
+                
+                'Adding text'
+                .Range("A1").Value = Sheets("Calcs").Range("A6").Value & " | " & Sheets("Calcs").Range("A5").Value & " | " & ActiveSheet.Name
+                .Range("A2").Value = "Pay Week"
+                .Range("C2").Value = "Payday"
+                .Range("D2").Value = "From # to # Check"
+                .Range("E2").Value = "Payroll Checks"
+                .Range("F2").Value = "GL Checks"
+                .Range("G2").Value = "Posted"
+                .Range("G3").Value = "MTO Mich WH"
+                .Range("H3").Value = "Federal EFTPS"
+                .Range("H5").Value = "FICA Fed FUTA"
+                .Range("I3").Value = "AME"
+                .Range("J2").Value = "New Emp."
+                .Range("K2").Value = "Dixon Invoice # Billed Monthly"
+                
+    
+            End With
+        Next qtr
+End Sub
+Public Sub BuildFooter(Row As Integer)
+    'initial formatting
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 1, 1), ActiveSheet.Cells(Row + 12, 11)).Font.Size = 10
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 1, 1), ActiveSheet.Cells(Row + 12, 11)).RowHeight = 16
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 1, 1), ActiveSheet.Cells(Row + 12, 11)).HorizontalAlignment = xlCenter
+    'first column
+    ActiveSheet.Cells(Row + 1, 1).Value = "FORMS"
+    ActiveSheet.Cells(Row + 2, 1).Value = "941"
+    ActiveSheet.Cells(Row + 3, 1).Value = "SUI"
+    ActiveSheet.Cells(Row + 4, 1).Value = "Local Tax"
+    ActiveSheet.Cells(Row + 5, 1).Value = "MI SUW"
+    ActiveSheet.Cells(Row + 8, 1).Value = "NAME"
+    ActiveSheet.Cells(Row + 9, 1).Value = "TITLE"
+    ActiveSheet.Cells(Row + 10, 1).Value = "ADDRESS"
+    ActiveSheet.Cells(Row + 11, 1).Value = "PHONE#"
+    ActiveSheet.Cells(Row + 12, 1).Value = "EIN"
+
+    'second column
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 8, 2), ActiveSheet.Cells(Row + 8, 3)).Merge 'name
+    ActiveSheet.Cells(Row + 8, 2).Value = Sheets("Calcs").Range("A1")
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 9, 2), ActiveSheet.Cells(Row + 9, 3)).Merge 'title
+    ActiveSheet.Cells(Row + 9, 2).Value = Sheets("Calcs").Range("A2")
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 10, 2), ActiveSheet.Cells(Row + 10, 3)).Merge 'address
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 10, 2), ActiveSheet.Cells(Row + 10, 3)).Font.Size = 8
+    ActiveSheet.Cells(Row + 10, 2).Value = Sheets("Calcs").Range("A3")
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 11, 2), ActiveSheet.Cells(Row + 11, 3)).Merge 'Phone#
+    ActiveSheet.Cells(Row + 11, 2).Value = Sheets("Calcs").Range("A4")
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 12, 2), ActiveSheet.Cells(Row + 12, 3)).Merge 'EIN'
+    ActiveSheet.Cells(Row + 12, 2).Value = Sheets("Calcs").Range("A5")
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 4, 2), ActiveSheet.Cells(Row + 4, 3)).Merge
+    ActiveSheet.Cells(Row + 4, 2).Value = "Quarterly, Monthly"
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 5, 2), ActiveSheet.Cells(Row + 5, 3)).Merge
+    ActiveSheet.Cells(Row + 5, 2).Value = "Quarterly, Monthly, Annual"
+    
+    'third column
+    
+    
+    'fourth coulumn and 5th (merged) columns
+    ActiveSheet.Cells(Row + 1, 4).Value = "DATE"
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 1, 5), ActiveSheet.Cells(Row + 1, 11)).Merge 'Merge the cells for Notes
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 1, 5), ActiveSheet.Cells(Row + 12, 11)).Merge (True) 'Notes area
+    ActiveSheet.Cells(Row + 1, 5).Value = "NOTES"
+    
+    'after formatting, add borders
+    ActiveSheet.Range(ActiveSheet.Cells(Row + 1, 1), ActiveSheet.Cells(Row + 12, 11)).Borders.LineStyle = xlContinuous 'add borders
+       
+   'end of year additions like W2s and 1099s
+    If ActiveSheet.Name = "4th Quarter" Then
+        ActiveSheet.Cells(Row + 6, 1).Value = "W2/1099"
+        ActiveSheet.Range(ActiveSheet.Cells(Row + 1, 1), ActiveSheet.Cells(Row + 6, 11)).Borders.LineStyle = xlContinuous
+        ActiveSheet.Cells(Row + 4, 2).Value = "Quarterly, Monthly, Annual"
+        MsgBox "Your Calendar is built. Feel free to make modifications. Double Check your dates.", vbOKOnly, "Reminder!"
+    End If
+    
+End Sub
+
+Public Sub FillDates()
+    Dim lastRow As Integer
+    '==================== 1st Quarter Sheet =========================='
+    Worksheets("1st Quarter").Activate
+    'set our height
+    ActiveSheet.Rows(6).RowHeight = 30
+    'seed our 1st quarter sheet with the date from FindFirstWeek'
+    ActiveSheet.Range("A6").Value = A
+    ActiveSheet.Range("B6").Value = B
+    ActiveSheet.Range("C6").Value = C
+    
+    'I dont think there can be 5 pay periods for 3 months, but just to be safe'
+    For Row = 7 To 22
+        ActiveSheet.Rows(Row).RowHeight = 45
+        
+        'update our days'
+        If promptBiWeekly = 6 Then
+            A = A + 14
+            B = B + 14
+            C = C + 14
+        End If
+        If promptBiWeekly = 7 Then
+            A = A + 7
+            B = B + 7
+            C = C + 7
+        End If
+        ActiveSheet.Cells(Row, 1).Value = A
+        ActiveSheet.Cells(Row, 2).Value = B
+        ActiveSheet.Cells(Row, 3).Value = C
+
+        If Month(C) = 4 Then
+            ActiveSheet.Range(ActiveSheet.Cells(Row, 4), ActiveSheet.Cells(Row, 11)).Merge
+            ActiveSheet.Cells(Row, 4).Value = "End of the Quarter"
+            lastRow = Row 'store our row to pass to 2nd quarter'
+            ActiveSheet.Range("A1", ActiveSheet.Cells(Row, 11)).Borders.LineStyle = xlContinuous 'add borders
+            BuildFooter (lastRow)
+            Exit For
+        End If
+    Next Row
+    
+    '==================== 2nd Quarter Sheet =========================='
+    Worksheets("2nd Quarter").Activate
+    'set our height
+    ActiveSheet.Rows(6).RowHeight = 45
+    'seed our 1st quarter sheet with the date from FindFirstWeek'
+    A = Sheets("1st Quarter").Cells(lastRow, 1).Value
+    B = Sheets("1st Quarter").Cells(lastRow, 2).Value
+    C = Sheets("1st Quarter").Cells(lastRow, 3).Value
+    ActiveSheet.Range("A6").Value = A
+    ActiveSheet.Range("B6").Value = B
+    ActiveSheet.Range("C6").Value = C
+    
+    'I dont think there can be 5 pay periods for 3 months, but just to be safe'
+    For Row = 7 To 22
+        ActiveSheet.Rows(Row).RowHeight = 45
+        
+        'update our days'
+        If promptBiWeekly = 6 Then
+            A = A + 14
+            B = B + 14
+            C = C + 14
+        End If
+        If promptBiWeekly = 7 Then
+            A = A + 7
+            B = B + 7
+            C = C + 7
+        End If
+        
+        ActiveSheet.Cells(Row, 1).Value = A
+        ActiveSheet.Cells(Row, 2).Value = B
+        ActiveSheet.Cells(Row, 3).Value = C
+
+        If Month(C) = 7 Then
+            ActiveSheet.Range(ActiveSheet.Cells(Row, 4), ActiveSheet.Cells(Row, 11)).Merge
+            ActiveSheet.Cells(Row, 4).Value = "End of the Quarter"
+            lastRow = Row 'store our row to pass to 3rd quarter'
+            BuildFooter (lastRow)
+            ActiveSheet.Range("A1", ActiveSheet.Cells(Row, 11)).Borders.LineStyle = xlContinuous 'add borders
+            Exit For
+        End If
+    Next Row
+    
+    '==================== 3rd Quarter Sheet =========================='
+    Worksheets("3rd Quarter").Activate
+    'set our height
+    ActiveSheet.Rows(6).RowHeight = 45
+
+    A = Sheets("2nd Quarter").Cells(lastRow, 1).Value
+    B = Sheets("2nd Quarter").Cells(lastRow, 2).Value
+    C = Sheets("2nd Quarter").Cells(lastRow, 3).Value
+    ActiveSheet.Range("A6").Value = A
+    ActiveSheet.Range("B6").Value = B
+    ActiveSheet.Range("C6").Value = C
+    
+    'I dont think there can be 5 pay periods for 3 months, but just to be safe'
+    For Row = 7 To 22
+        ActiveSheet.Rows(Row).RowHeight = 45
+        
+        'update our days'
+        If promptBiWeekly = 6 Then
+            A = A + 14
+            B = B + 14
+            C = C + 14
+        End If
+        If promptBiWeekly = 7 Then
+            A = A + 7
+            B = B + 7
+            C = C + 7
+        End If
+        
+        ActiveSheet.Cells(Row, 1).Value = A
+        ActiveSheet.Cells(Row, 2).Value = B
+        ActiveSheet.Cells(Row, 3).Value = C
+
+        If Month(C) = 10 Then
+            ActiveSheet.Range(ActiveSheet.Cells(Row, 4), ActiveSheet.Cells(Row, 11)).Merge
+            ActiveSheet.Cells(Row, 4).Value = "End of the Quarter"
+            lastRow = Row 'store our row to pass to 4th quarter'
+            BuildFooter (lastRow)
+            ActiveSheet.Range("A1", ActiveSheet.Cells(Row, 11)).Borders.LineStyle = xlContinuous 'add borders
+            Exit For
+        End If
+    Next Row
+    
+    '==================== 4th Quarter Sheet =========================='
+    Worksheets("4th Quarter").Activate
+    'set our height
+    ActiveSheet.Rows(6).RowHeight = 45
+    
+    A = Sheets("3rd Quarter").Cells(lastRow, 1).Value
+    B = Sheets("3rd Quarter").Cells(lastRow, 2).Value
+    C = Sheets("3rd Quarter").Cells(lastRow, 3).Value
+    ActiveSheet.Range("A6").Value = A
+    ActiveSheet.Range("B6").Value = B
+    ActiveSheet.Range("C6").Value = C
+    
+    'I dont think there can be 5 pay periods for 3 months, but just to be safe'
+    For Row = 7 To 22
+        ActiveSheet.Rows(Row).RowHeight = 45
+        
+        'update our days'
+        If promptBiWeekly = 6 Then
+            A = A + 14
+            B = B + 14
+            C = C + 14
+        End If
+        If promptBiWeekly = 7 Then
+            A = A + 7
+            B = B + 7
+            C = C + 7
+        End If
+        
+        ActiveSheet.Cells(Row, 1).Value = A
+        ActiveSheet.Cells(Row, 2).Value = B
+        ActiveSheet.Cells(Row, 3).Value = C
+
+        If Month(C) = 1 Then
+            ActiveSheet.Range(ActiveSheet.Cells(Row, 4), ActiveSheet.Cells(Row, 11)).Merge
+            ActiveSheet.Cells(Row, 4).Value = "End of the Quarter"
+            lastRow = Row 'store our row to pass to 2nd quarter'
+            BuildFooter (lastRow)
+            ActiveSheet.Range("A1", ActiveSheet.Cells(Row, 11)).Borders.LineStyle = xlContinuous 'add borders
+            Exit For
+        End If
+    Next Row
+        
+End Sub
+
+Private Sub Workbook_Open()
+    ActiveSheet.PageSetup.Orientation = xlLandscape 'set us to Landscape'
+
+
+    
+    Application.DisplayAlerts = False
+    'search for all our sheets by name and add if they dont exist'
+        For i = 1 To Application.ActiveWorkbook.Sheets.Count
+        If ActiveWorkbook.Sheets(i).Name = "calcs" Then
+            Exit For
+        End If
+        
+        If i = Application.ActiveWorkbook.Sheets.Count Then
+            Sheets.Add.Name = "calcs"
+        End If
+    Next i
+    
+    For i = 1 To Application.ActiveWorkbook.Sheets.Count
+        If ActiveWorkbook.Sheets(i).Name = "4th Quarter" Then
+            Exit For
+        End If
+        
+        If i = Application.ActiveWorkbook.Sheets.Count Then
+            Sheets.Add.Name = "4th Quarter"
+        End If
+    Next i
+    
+    For i = 1 To Application.ActiveWorkbook.Sheets.Count
+        If ActiveWorkbook.Sheets(i).Name = "3rd Quarter" Then
+            Exit For
+        End If
+        
+        If i = Application.ActiveWorkbook.Sheets.Count Then
+            Sheets.Add.Name = "3rd Quarter"
+        End If
+    Next i
+    
+    For i = 1 To Application.ActiveWorkbook.Sheets.Count
+        If ActiveWorkbook.Sheets(i).Name = "2nd Quarter" Then
+            Exit For
+        End If
+        
+        If i = Application.ActiveWorkbook.Sheets.Count Then
+            Sheets.Add.Name = "2nd Quarter"
+        End If
+    Next i
+    
+    For i = 1 To Application.ActiveWorkbook.Sheets.Count
+        If ActiveWorkbook.Sheets(i).Name = "1st Quarter" Then
+            Exit For
+        End If
+        
+        If i = Application.ActiveWorkbook.Sheets.Count Then
+            Sheets.Add.Name = "1st Quarter"
+        End If
+    Next i
+    
+    Application.DisplayAlerts = True
+    
+    'clear all the sheets info and formatting'
+    Sheets("1st Quarter").Cells.Clear
+    Sheets("1st Quarter").Cells.ClearFormats
+    Sheets("2nd Quarter").Cells.Clear
+    Sheets("2nd Quarter").Cells.ClearFormats
+    Sheets("3rd Quarter").Cells.Clear
+    Sheets("3rd Quarter").Cells.ClearFormats
+    Sheets("4th Quarter").Cells.Clear
+    Sheets("4th Quarter").Cells.ClearFormats
+    
+    promptPayday = InputBox("Enter the payday of the period. Usually a friday, as mm/dd/yyyy")
+    promptFirstday = InputBox("Enter the first day of the pay period. Usually a monday, as mm/dd/yyyy")
+    promptBiWeekly = MsgBox("Is the Payroll Bi-Weekly?", vbYesNo)
+    Sheets("calcs").Range("A6").Value = InputBox("What is the company name?")
+    Sheets("calcs").Range("A1").Value = InputBox("What is the owner's name?")
+    Sheets("calcs").Range("A2").Value = InputBox("What is their title?")
+    Sheets("calcs").Range("A3").Value = InputBox("What is the business address? Street, City, State Zip")
+    Sheets("calcs").Range("A4").Value = InputBox("What is the owner's phone number?")
+    Sheets("calcs").Range("A5").Value = InputBox("What is the company EIN?")
+    Sheets("calcs").Visible = xlSheetHidden
+    
+    Call FindFirstWeek
+    Call BuildHeader
+    Call FillDates
+    
+    
+End Sub 
+
